@@ -92,7 +92,7 @@ def GamePrice(games):
 
 
 
-def Parser():
+def ParserF():
     global gamelist
     gamelist = []
     with open("Games.txt", "r") as f:
@@ -119,5 +119,6 @@ def Parser():
             if (len(gamelist) == len(games)): break
         games = GamePrice(games)
         print(games)
+        return games
     else:
         print("Error")
