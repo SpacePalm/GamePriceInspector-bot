@@ -1,0 +1,2 @@
+# GamePriceInspector-bot
+In progress
