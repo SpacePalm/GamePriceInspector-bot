@@ -1,5 +1,6 @@
 import requests
 import csv
+import LoggerFile
 from bs4 import BeautifulSoup
 
 
@@ -104,7 +105,7 @@ def ParserF():
     PAGENATION = GetLastPage(html.text)
     if html.status_code == 200:
         games=[]
-        print(f"Parsing page {1}")
+        LoggerFile.logger.info(f"Parsing page {1}")
         html = GetHtml(URL)
         games.extend(GetContent(html.text))
         if (len(gamelist) == len(games)):
@@ -112,13 +113,13 @@ def ParserF():
             return 0
 
         for page in range(2,PAGENATION + 1):
-            print(f"Parsing page {page}")
+            LoggerFile.logger.info(f"Parsing page {page}")
             html = GetHtml(URL+str(page))
             games.extend(GetContent(html.text))
 #            SaveContent1(games, CSV)
             if (len(gamelist) == len(games)): break
         games = GamePrice(games)
-        print(games)
+        LoggerFile.logger.info(games)
         return games
     else:
-        print("Error")
+        LoggerFile.logger.error("Error")

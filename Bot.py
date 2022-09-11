@@ -1,5 +1,6 @@
 import telebot
 import Parser
+import LoggerFile
 from telebot import types
 
 bot = telebot.TeleBot("5590251989:AAGwUmFjO6OWVtljPN_IZppGVJ09u51LxGc")
@@ -40,9 +41,9 @@ def OneCheck(messege: types.CallbackQuery):
         l = games[i]["Pricelist"]
         markup1 = types.InlineKeyboardMarkup()
         msg = ""
-        for j in range(0, len(l)):
+        for j in l:# нахуй индексы используем прогон по элементам
 
-            msg += f"{l[j]['shop_title']}: {l[j]['price']}\n"
+            msg += f"{j['shop_title']}: {j['price']}\n"
 #            if l[j]['price'] != "нет в наличии":
 #                s = l[j]['shop_title']
 #                btn = types.InlineKeyboardButton(s, url=l[j]['link'])
@@ -98,7 +99,7 @@ def SetupGames(messege):
 
 
 def DeliteMessege(messege):
-    print(message_DB)
+    LoggerFile.logger.info(message_DB)
     for i in message_DB:
         bot.delete_message(messege.from_user.id, i)
     message_DB.clear()
