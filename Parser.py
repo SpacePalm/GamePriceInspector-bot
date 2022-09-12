@@ -1,6 +1,6 @@
 import requests
-import csv
 import LoggerFile
+import json
 from bs4 import BeautifulSoup
 
 
@@ -19,7 +19,6 @@ def ConvertTitle(games):
     games = games.replace("-", "")
     games = games.replace(":", "")
     games = games.replace("\n", "")
-      #а потом идет сравнение с такойже конвертированной строкой и в качестве заголовка оригинальный заголовок
     return games
 
 def ConvertTitleList(games):
@@ -30,7 +29,6 @@ def ConvertTitleList(games):
         i = i.replace("-", "")
         i = i.replace(":", "")
         i = i.replace("\n", "")
-          #а потом идет сравнение с такойже конвертированной строкой и в качестве заголовка оригинальный заголовок
         list.append(i)
     return list
 
@@ -62,14 +60,6 @@ def GetLastPage(html):
     lpage = soup.find("div", class_="pagination").find("span", class_ = "last").find("a", class_ = "arrow last").get_text()
     return int(lpage)
 
-
-#def SaveContent1(items, path):
-#    with open(path, "w", newline= "") as file:
-#        writer = csv.writer(file, delimiter= ";")
-#        for item in items:
- #           writer.writerow([item["title"], item["game_image"]])
-
-
 def GetPrice(html):
     soup = BeautifulSoup(html, "html.parser")
     items = soup.find_all("div", class_="price-list-item")
@@ -96,9 +86,8 @@ def GamePrice(games):
 def ParserF():
     global gamelist
     gamelist = []
-    with open("Games.txt", "r") as f:
-        for g in f.readlines():
-            gamelist.append(g)
+    with open("JsonList.json", "r") as f:
+        gamelist = json.load(f)
     gamelist = ConvertTitleList(gamelist)
 
     html = GetHtml(URL)
@@ -109,14 +98,12 @@ def ParserF():
         html = GetHtml(URL)
         games.extend(GetContent(html.text))
         if (len(gamelist) == len(games)):
-#           SaveContent1(games, CSV)
             return 0
 
         for page in range(2,PAGENATION + 1):
             LoggerFile.logger.info(f"Parsing page {page}")
             html = GetHtml(URL+str(page))
             games.extend(GetContent(html.text))
-#            SaveContent1(games, CSV)
             if (len(gamelist) == len(games)): break
         games = GamePrice(games)
         LoggerFile.logger.info(games)

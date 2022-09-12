@@ -1,6 +1,7 @@
 import telebot
 import Parser
 import LoggerFile
+import json
 from telebot import types
 
 bot = telebot.TeleBot("5590251989:AAGwUmFjO6OWVtljPN_IZppGVJ09u51LxGc")
@@ -86,11 +87,11 @@ def SetupGames(messege):
     global GamesCount, Gamesf
     Gamesf = True
     games = messege.text
-    f = open("Games.txt", "w")
-    GamesCount = games.count("/") + 1
-    games = games.replace("/", "\n")
-    f.write(games)
-    f.close()
+    with open("JsonList.json", "w") as file:
+        GamesCount = games.count("/") + 1
+        games = games.split("/")
+        json.dump(games, file)
+    file.close()
     markup = types.InlineKeyboardMarkup()
     markup.add(types.InlineKeyboardButton("Продолжить работу", callback_data= "mstart"), types.InlineKeyboardButton("Перезаписать названия", callback_data= "reset"))
     a = bot.send_message(messege.chat.id, "Настройка успешно завершена", reply_markup= markup)
