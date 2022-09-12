@@ -65,7 +65,7 @@ def OneCheck(messege: types.CallbackQuery):
 @bot.callback_query_handler(lambda c: c.data == 'help')
 @bot.message_handler(commands = ["help"])
 def Help(messege):
-    bot.send_message(messege.from_user.id, "ge")
+    bot.send_message(messege.from_user.id, "Данный бот работает как поисковик цен на игры, вы вводите названия, а бот ищет доступные цены. Если вы не обнаружили ваш любмый магазин, не беспокойтесь, он будет добавле в ближайшее время. Для корректной работы бота нажмите /start или выберете в списке команд и следуйте инструкции.")
 
 
 
