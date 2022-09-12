@@ -42,15 +42,14 @@ def OneCheck(messege: types.CallbackQuery):
         l = games[i]["Pricelist"]
         markup1 = types.InlineKeyboardMarkup()
         msg = ""
-        for j in l:# нахуй индексы используем прогон по элементам
-
-            msg += f"{j['shop_title']}: {j['price']}\n"
-#            if l[j]['price'] != "нет в наличии":
-#                s = l[j]['shop_title']
-#                btn = types.InlineKeyboardButton(s, url=l[j]['link'])
-#                markup1.add(btn)
-#            else:
-#                pass
+        for j in l:
+            if j['price'] != "нет в наличии":
+                msg += f"{j['shop_title']}: {j['price']}\n"
+                s = j['shop_title']
+                btn = types.InlineKeyboardButton(s, url=j['link'])
+                markup1.add(btn)
+            else:
+                pass
         a = bot.send_message(messege.from_user.id,msg,  reply_markup=markup1)
         message_DB.append(a.message_id)
 
@@ -59,8 +58,6 @@ def OneCheck(messege: types.CallbackQuery):
 
     a = bot.send_message(messege.from_user.id, "Выберете режим работы", reply_markup=markup)
     message_DB.append(a.message_id)
-
-    #DeliteMessege(messege)
 
 
 
