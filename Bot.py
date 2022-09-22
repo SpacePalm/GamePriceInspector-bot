@@ -37,7 +37,7 @@ def OneCheck(messege: types.CallbackQuery):
     onebtn = types.InlineKeyboardButton("Разовая проверка", callback_data="onecheck")
     # dailybtn = types.InlineKeyboardButton("Периодическая проверка", callback_data="timecheck")
     changebtn = types.InlineKeyboardButton("Изменить список", callback_data="reset")
-    markup.add(onebtn, dailybtn, changebtn)
+    markup.add(onebtn, changebtn)
 
 
     for i in range (0, len(games)):
