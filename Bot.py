@@ -2,12 +2,16 @@ import telebot
 import Parser
 import LoggerFile
 import json
+# import datetime
+# from datetime import date, timedelta
 from telebot import types
 
 bot = telebot.TeleBot("5590251989:AAGwUmFjO6OWVtljPN_IZppGVJ09u51LxGc")
 message_DB = []
 GamesCount = 0
 Gamesf = True
+# timestart = False
+# timeneed = 0
 
 @bot.callback_query_handler(lambda c: c.data == 'mstart')
 @bot.message_handler(commands = ["mstart"])
@@ -15,8 +19,8 @@ def Mstart(messege: types.CallbackQuery):
     DeliteMessege(messege)
     markup = types.InlineKeyboardMarkup()
     onebtn = types.InlineKeyboardButton("Разовая проверка", callback_data="onecheck")
-    dailybtn = types.InlineKeyboardButton("Периодическая проверка", callback_data="timecheck")
-    markup.add(onebtn, dailybtn)
+    # dailybtn = types.InlineKeyboardButton("Периодическая проверка", callback_data="timecheck")
+    markup.add(onebtn)
     a = bot.send_message(messege.from_user.id, "Хорошо, выберете режим работы", reply_markup=markup)
     message_DB.append(a.message_id)
 
@@ -31,7 +35,7 @@ def OneCheck(messege: types.CallbackQuery):
 
     markup = types.InlineKeyboardMarkup()
     onebtn = types.InlineKeyboardButton("Разовая проверка", callback_data="onecheck")
-    dailybtn = types.InlineKeyboardButton("Периодическая проверка", callback_data="timecheck")
+    # dailybtn = types.InlineKeyboardButton("Периодическая проверка", callback_data="timecheck")
     changebtn = types.InlineKeyboardButton("Изменить список", callback_data="reset")
     markup.add(onebtn, dailybtn, changebtn)
 
@@ -50,8 +54,13 @@ def OneCheck(messege: types.CallbackQuery):
                 markup1.add(btn)
             else:
                 pass
-        a = bot.send_message(messege.from_user.id,msg,  reply_markup=markup1)
-        message_DB.append(a.message_id)
+        if msg == "":
+            a = bot.send_message(messege.from_user.id,"К сожалению данной игры нет в наличии ни в одном из доступных магазинов")
+            message_DB.append(a.message_id)
+        else:
+            a = bot.send_message(messege.from_user.id,msg,  reply_markup=markup1)
+            message_DB.append(a.message_id)
+
 
     if len(games) != GamesCount:
         bot.send_message(messege.from_user.id, "Одно или несколько названий были введены некорректно, повторите ввод")
@@ -60,13 +69,35 @@ def OneCheck(messege: types.CallbackQuery):
     message_DB.append(a.message_id)
 
 
+# @bot.callback_query_handler(lambda c: c.data == 'timecheck')
+# def TimeCheck(messege: types.CallbackQuery):
+#     timestart = True
+#     DeliteMessege(messege)
+#     markup = types.InlineKeyboardMarkup(row_width=1)
+#     onedaybtn = types.InlineKeyboardButton("Каждый день", callback_data="oneday")
+#     weekbtn = types.InlineKeyboardButton("Каждую неделю", callback_data="week")
+#     threedaysbtn = types.InlineKeyboardButton("каждые три дня", callback_data="threedays")
+#     markup.add(onedaybtn, weekbtn, threedaysbtn)
+#     a = bot.send_message(messege.from_user.id, "С какой периодичностью вам напоминать?", reply_markup=markup)
+#     message_DB.append(a.message_id)
+#     currenttime = date.today()
+#     @bot.callback_query_handler(func=lambda c: True)
+#     def DaysChecking(c):
+#         if c.data == "oneday": # One day fnc
+#             timeneed = currenttime + timedelta(days=1)
+#         if c.data == "week": # Week fnc
+#             timeneed = currenttime + timedelta(days=7)
+#         if c.data == "threedays": # Three days fnc
+#             timeneed = currenttime + timedelta(days=3)
+
 
 
 @bot.callback_query_handler(lambda c: c.data == 'help')
 @bot.message_handler(commands = ["help"])
 def Help(messege):
-    bot.send_message(messege.from_user.id, "Данный бот работает как поисковик цен на игры, вы вводите названия, а бот ищет доступные цены. Если вы не обнаружили ваш любмый магазин, не беспокойтесь, он будет добавле в ближайшее время. Для корректной работы бота нажмите /start или выберете в списке команд и следуйте инструкции.")
-
+    message_DB.append(messege.message_id)
+    a = bot.send_message(messege.from_user.id, "Данный бот работает как поисковик цен на игры, вы вводите названия, а бот ищет доступные цены. Если вы не обнаружили ваш любмый магазин, не беспокойтесь, он будет добавле в ближайшее время. Для корректной работы бота нажмите /start или выберете в списке команд и следуйте инструкции.")
+    message_DB.append(a.message_id)
 
 
 @bot.message_handler(commands = ["start"])
@@ -115,8 +146,9 @@ def Reset(messege: types.CallbackQuery):
 def Welcome(messege: types.CallbackQuery):
     DeliteMessege(messege)
     a = bot.send_message(messege.from_user.id, "Нажмите /help, чтобы увидеть документацию", reply_markup=types.ReplyKeyboardRemove())
-    message_DB.append(messege.message_id)
+    # message_DB.append(messege.message_id)
     message_DB.append(a.message_id)
+
 
 
 @bot.message_handler(content_types=['text'])
@@ -125,6 +157,10 @@ def UnsrF(messege):
         a = bot.send_message(messege.chat.id, "Я вас не понимаю. Нажмите /help, чтобы увидеть документацию")
         message_DB.append(messege.message_id)
         message_DB.append(a.message_id)
+
+
+
+
 
 
 bot.polling(none_stop= True)
