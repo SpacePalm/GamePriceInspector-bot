@@ -2,16 +2,15 @@ import telebot
 import Parser
 import LoggerFile
 import json
-# import datetime
-# from datetime import date, timedelta
+import asyncio
 from telebot import types
 
 bot = telebot.TeleBot("5590251989:AAGwUmFjO6OWVtljPN_IZppGVJ09u51LxGc")
 message_DB = []
 GamesCount = 0
 Gamesf = True
-# timestart = False
-# timeneed = 0
+timestart = False
+timeneed = 0
 
 @bot.callback_query_handler(lambda c: c.data == 'mstart')
 @bot.message_handler(commands = ["mstart"])
@@ -19,8 +18,8 @@ def Mstart(messege: types.CallbackQuery):
     DeliteMessege(messege)
     markup = types.InlineKeyboardMarkup()
     onebtn = types.InlineKeyboardButton("Разовая проверка", callback_data="onecheck")
-    # dailybtn = types.InlineKeyboardButton("Периодическая проверка", callback_data="timecheck")
-    markup.add(onebtn)
+    dailybtn = types.InlineKeyboardButton("Периодическая проверка", callback_data="timecheck")
+    markup.add(onebtn, dailybtn)
     a = bot.send_message(messege.from_user.id, "Хорошо, выберете режим работы", reply_markup=markup)
     message_DB.append(a.message_id)
 
@@ -28,16 +27,18 @@ def Mstart(messege: types.CallbackQuery):
 def OneCheck(messege: types.CallbackQuery):
     DeliteMessege(messege)
 
-    a = bot.send_message(messege.from_user.id, "Ожидайте, идет поиск лучших цен на игры по запросу. Это может занять до нескольких минут...")
+    a = bot.send_message(messege.from_user.id, "Ожидайте, идет поиск лучших цен на все игры с схожими названиями по запросу. Это может занять до нескольких минут...")
     message_DB.append(a.message_id)
-    games = Parser.ParserF()
+    Parser.ParserF()
+    with open("GameInfo.json", "r") as file:
+        games = json.load(file)
     DeliteMessege(messege)
 
     markup = types.InlineKeyboardMarkup()
     onebtn = types.InlineKeyboardButton("Разовая проверка", callback_data="onecheck")
-    # dailybtn = types.InlineKeyboardButton("Периодическая проверка", callback_data="timecheck")
+    dailybtn = types.InlineKeyboardButton("Периодическая проверка", callback_data="timecheck")
     changebtn = types.InlineKeyboardButton("Изменить список", callback_data="reset")
-    markup.add(onebtn, changebtn)
+    markup.add(onebtn, dailybtn, changebtn)
 
 
     for i in range (0, len(games)):
@@ -62,7 +63,7 @@ def OneCheck(messege: types.CallbackQuery):
             message_DB.append(a.message_id)
 
 
-    if len(games) != GamesCount:
+    if len(games) < GamesCount:
         bot.send_message(messege.from_user.id, "Одно или несколько названий были введены некорректно, повторите ввод")
 
     a = bot.send_message(messege.from_user.id, "Выберете режим работы", reply_markup=markup)
@@ -89,7 +90,7 @@ def OneCheck(messege: types.CallbackQuery):
 #             timeneed = currenttime + timedelta(days=7)
 #         if c.data == "threedays": # Three days fnc
 #             timeneed = currenttime + timedelta(days=3)
-
+#
 
 
 @bot.callback_query_handler(lambda c: c.data == 'help')
@@ -118,7 +119,7 @@ def SetupGames(messege):
     with open("JsonList.json", "w") as file:
         GamesCount = games.count("/") + 1
         games = games.split("/")
-        json.dump(games, file)
+        json.dump(games, file, indent=5)
     file.close()
     markup = types.InlineKeyboardMarkup()
     markup.add(types.InlineKeyboardButton("Продолжить работу", callback_data= "mstart"), types.InlineKeyboardButton("Перезаписать названия", callback_data= "reset"))
@@ -158,9 +159,5 @@ def UnsrF(messege):
         message_DB.append(messege.message_id)
         message_DB.append(a.message_id)
 
-
-
-
-
-
+#asyncio.run(Parser.Timer())
 bot.polling(none_stop= True)

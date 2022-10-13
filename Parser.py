@@ -1,5 +1,6 @@
 import requests
 import LoggerFile
+import time
 import json
 from bs4 import BeautifulSoup
 
@@ -43,15 +44,18 @@ def GetContent(html):
     items = soup.find_all("div", class_ = "game-preview")
     games = []
 
-    for item in items:
-        if ConvertTitle(item.find("div", class_= "game-title").get_text(strip = True)) in gamelist:
-            games.append(
-                {
-                    "title": item.find("div", class_= "game-title").get_text(strip = True),
-                    "product_link": HOST + item.find("div", class_="game-title").find("a").get("href"),
-                    "game_image": item.find("a").find("img").get("src")
-                }
-            )
+
+    for i in gamelist:
+        for item in items:
+            a = ConvertTitle(item.find("div", class_= "game-title").get_text(strip = True))
+            if  a.count(i) == 1:
+                games.append(
+                    {
+                        "title": item.find("div", class_= "game-title").get_text(strip = True),
+                        "product_link": HOST + item.find("div", class_="game-title").find("a").get("href"),
+                        "game_image": item.find("a").find("img").get("src")
+                    }
+                )
     return games
 
 
@@ -84,6 +88,7 @@ def GamePrice(games):
 
 
 def ParserF():
+    flg = True
     global gamelist
     gamelist = []
     with open("JsonList.json", "r") as f:
@@ -97,16 +102,31 @@ def ParserF():
         LoggerFile.logger.info(f"Parsing page {1}")
         html = GetHtml(URL)
         games.extend(GetContent(html.text))
-        if (len(gamelist) == len(games)):
-            return 0
-
+        flg = False
+        games = GamePrice(games)
+        LoggerFile.logger.info("Done")
+        with open("GameInfo.json", "w") as file:
+            json.dump(games, file, indent=5)
+        #if flg:
         for page in range(2,PAGENATION + 1):
             LoggerFile.logger.info(f"Parsing page {page}")
             html = GetHtml(URL+str(page))
             games.extend(GetContent(html.text))
-            if (len(gamelist) == len(games)): break
+            #if (len(gamelist) == len(games)): break
         games = GamePrice(games)
-        LoggerFile.logger.info(games)
-        return games
+        LoggerFile.logger.info("Done")
+        with open("GameInfo.json", "w") as file:
+            json.dump(games,file,indent=5)
+
     else:
         LoggerFile.logger.error("Error")
+
+# current_time = time.strftime("%H:%M", time.localtime())
+
+# async def Timer():
+#     if(int(time.strftime("%H:%M", time.localtime())[-2]) == int(current_time[-2])+5):
+#         await ParserF()
+
+
+#парсин в фоне
+#json со всеми играми и поиск по нему
