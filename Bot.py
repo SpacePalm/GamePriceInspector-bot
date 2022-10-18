@@ -1,16 +1,21 @@
+import subprocess
+import sys
+import time
+
 import telebot
-import Parser
+
 import LoggerFile
 import json
-import asyncio
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 from telebot import types
 
 bot = telebot.TeleBot("5590251989:AAGwUmFjO6OWVtljPN_IZppGVJ09u51LxGc")
 message_DB = []
 GamesCount = 0
 Gamesf = True
-timestart = False
-timeneed = 0
+
+
 
 @bot.callback_query_handler(lambda c: c.data == 'mstart')
 @bot.message_handler(commands = ["mstart"])
@@ -29,22 +34,20 @@ def OneCheck(messege: types.CallbackQuery):
 
     a = bot.send_message(messege.from_user.id, "Ожидайте, идет поиск лучших цен на все игры с схожими названиями по запросу. Это может занять до нескольких минут...")
     message_DB.append(a.message_id)
-    Parser.ParserF()
+    time.sleep(5)
     with open("GameInfo.json", "r") as file:
         games = json.load(file)
     DeliteMessege(messege)
 
     markup = types.InlineKeyboardMarkup()
     onebtn = types.InlineKeyboardButton("Разовая проверка", callback_data="onecheck")
-    dailybtn = types.InlineKeyboardButton("Периодическая проверка", callback_data="timecheck")
     changebtn = types.InlineKeyboardButton("Изменить список", callback_data="reset")
-    markup.add(onebtn, dailybtn, changebtn)
+    markup.add(onebtn, changebtn)
 
-
-    for i in range (0, len(games)):
-        a = bot.send_message(messege.from_user.id, f"Список цен на игру {games[i]['title']}: ")
+    for i in range(0, len(games)):
+        a = bot.send_message(messege.from_user.id, f"Список цен на игру {games[i][0]}: ")
         message_DB.append(a.message_id)
-        l = games[i]["Pricelist"]
+        l = games[i][1]
         markup1 = types.InlineKeyboardMarkup()
         msg = ""
         for j in l:
@@ -56,41 +59,22 @@ def OneCheck(messege: types.CallbackQuery):
             else:
                 pass
         if msg == "":
-            a = bot.send_message(messege.from_user.id,"К сожалению данной игры нет в наличии ни в одном из доступных магазинов")
+            a = bot.send_message(messege.from_user.id, "К сожалению данной игры нет в наличии ни в одном из доступных магазинов")
             message_DB.append(a.message_id)
         else:
-            a = bot.send_message(messege.from_user.id,msg,  reply_markup=markup1)
+            a = bot.send_message(messege.from_user.id, msg, reply_markup=markup1)
             message_DB.append(a.message_id)
-
 
     if len(games) < GamesCount:
         bot.send_message(messege.from_user.id, "Одно или несколько названий были введены некорректно, повторите ввод")
 
-    a = bot.send_message(messege.from_user.id, "Выберете режим работы", reply_markup=markup)
-    message_DB.append(a.message_id)
+        a = bot.send_message(messege.from_user.id, "Выберете режим работы", reply_markup=markup)
+        message_DB.append(a.message_id)
 
 
-# @bot.callback_query_handler(lambda c: c.data == 'timecheck')
-# def TimeCheck(messege: types.CallbackQuery):
-#     timestart = True
-#     DeliteMessege(messege)
-#     markup = types.InlineKeyboardMarkup(row_width=1)
-#     onedaybtn = types.InlineKeyboardButton("Каждый день", callback_data="oneday")
-#     weekbtn = types.InlineKeyboardButton("Каждую неделю", callback_data="week")
-#     threedaysbtn = types.InlineKeyboardButton("каждые три дня", callback_data="threedays")
-#     markup.add(onedaybtn, weekbtn, threedaysbtn)
-#     a = bot.send_message(messege.from_user.id, "С какой периодичностью вам напоминать?", reply_markup=markup)
-#     message_DB.append(a.message_id)
-#     currenttime = date.today()
-#     @bot.callback_query_handler(func=lambda c: True)
-#     def DaysChecking(c):
-#         if c.data == "oneday": # One day fnc
-#             timeneed = currenttime + timedelta(days=1)
-#         if c.data == "week": # Week fnc
-#             timeneed = currenttime + timedelta(days=7)
-#         if c.data == "threedays": # Three days fnc
-#             timeneed = currenttime + timedelta(days=3)
-#
+
+
+
 
 
 @bot.callback_query_handler(lambda c: c.data == 'help')
@@ -159,6 +143,5 @@ def UnsrF(messege):
         message_DB.append(messege.message_id)
         message_DB.append(a.message_id)
 
-#asyncio.run(Parser.Timer())
 bot.polling(none_stop= True)
-#отдельно 2 проги
+subprocess.Popen("Python3 Parser.py", executable= sys.executable, shell= True)

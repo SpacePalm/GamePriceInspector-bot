@@ -75,13 +75,14 @@ def GamePrice(l,f):
                 h = GetHtml(j["product_link"])
                 soup = BeautifulSoup(h.text, "html.parser")
                 items = soup.find_all("div", class_="price-list-item")
+                g = []
 
                 for item in items:
-                    g = {
+                    g.append( {
                             "shop_title": item.find("div", class_="price-col-1").find("img").get("title"),
                             "link": item.find("div", class_="hidden-link2").get("data-href"),
                             "price": item.find("div", class_="price-col-3").find("div",class_="game-price").get_text().replace("купить\n", "")
-                        }
+                        })
                 pricelist.append([j["title"], g])
     return pricelist
 
