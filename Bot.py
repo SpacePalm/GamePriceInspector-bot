@@ -161,3 +161,4 @@ def UnsrF(messege):
 
 #asyncio.run(Parser.Timer())
 bot.polling(none_stop= True)
+#отдельно 2 проги
